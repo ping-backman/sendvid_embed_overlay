@@ -38,53 +38,77 @@
     /* Message box */
     .message-box {
       position: fixed;
-      top: 50%;
+      top: 20px;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       background: rgba(0,0,0,0.85);
       color: white;
-      padding: 25px;
-      border-radius: 10px;
+      padding: 15px 25px;
+      border-radius: 8px;
       max-width: 90%;
-      width: 400px;
+      width: 500px;
       z-index: 200;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       display: none;
     }
     
     .message-box h2 {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
       color: #ff6b6b;
     }
     
     .message-box p {
-      margin-bottom: 20px;
-      line-height: 1.5;
+      margin-bottom: 15px;
+      line-height: 1.4;
+      font-size: 0.95em;
     }
     
     .message-box button {
       background: #4CAF50;
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 8px 15px;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 14px;
       transition: background 0.3s;
     }
     
     .message-box button:hover {
       background: #45a049;
     }
+    
+    .player-instruction {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      color: white;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      font-size: 0.9em;
+      z-index: 150;
+    }
   </style>
 </head>
 <body>
   <h1>SendVid Embed Test</h1>
   
+  <!-- Instruction message -->
+  <div class="message-box" id="messageBox">
+    <h2>Action Required</h2>
+    <p>Your video is ready to play. Please click the play button below to start watching.</p>
+    <button id="closeMessage">Got It</button>
+  </div>
+  
   <div class="video-container">
+    <!-- Player instruction -->
+    <div class="player-instruction" id="playerInstruction">Click the play button ▶ to start video</div>
+    
     <!-- Transparent overlay - only show on initial page -->
-    <div class="click-overlay" id="clickOverlay" style="display: none;"></div>
+    <div class="click-overlay" id="clickOverlay"></div>
     
     <!-- Video iframe -->
     <iframe 
@@ -98,55 +122,38 @@
       allow="autoplay; fullscreen">
     </iframe>
   </div>
-  
-  <!-- Instruction message -->
-  <div class="message-box" id="messageBox">
-    <h2>Click Play to Start Video</h2>
-    <p>The video has opened in a new tab. Please return to the new tab and click the play button to start watching.</p>
-    <button onclick="document.getElementById('messageBox').style.display='none'">
-      OK, I Understand
-    </button>
-  </div>
 
   <script>
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const isPlaybackTab = urlParams.get('playback') === '1';
+    const isPlaybackTab = urlParams.get('pb') === '1';
     
     // Get elements
     const overlay = document.getElementById('clickOverlay');
     const messageBox = document.getElementById('messageBox');
+    const playerInstruction = document.getElementById('playerInstruction');
     const videoFrame = document.getElementById('videoFrame');
+    const closeButton = document.getElementById('closeMessage');
+    
+    // Close message handler
+    closeButton.addEventListener('click', function() {
+      messageBox.style.display = 'none';
+    });
     
     if (!isPlaybackTab) {
       // Initial tab with overlay
       overlay.style.display = 'block';
+      messageBox.style.display = 'none';
+      playerInstruction.style.display = 'none';
       
       // Overlay click handler
       overlay.addEventListener('click', function() {
-        // 1. Open playback tab (with ?playback=1 parameter)
-        const playbackUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'playback=1';
-        const newTab = window.open(playbackUrl, '_blank');
+        // 1. Open playback tab (with pb=1 parameter)
+        const playbackUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'pb=1';
+        window.open(playbackUrl, '_blank');
         
-        // 2. Redirect current tab to smartlink after delay
-        setTimeout(() => {
-          window.location.href = 'https://en.wikipedia.org/wiki/Main_Page';
-        }, 100);
-        
-        // 3. Show instruction message
-        messageBox.style.display = 'block';
-        
-        // 4. Hide overlay
-        overlay.style.display = 'none';
-        
-        // 5. Focus back on new tab
-        try {
-          if (newTab) {
-            setTimeout(() => newTab.focus(), 500);
-          }
-        } catch (e) {
-          // Cross-origin focus may be blocked
-        }
+        // 2. Redirect current tab to smartlink
+        window.location.href = 'https://en.wikipedia.org/wiki/Main_Page';
       });
       
       // Prevent iframe from capturing clicks
@@ -154,19 +161,21 @@
         e.stopPropagation();
       });
     } else {
-      // Playback tab - no overlay
+      // Playback tab - show instructions
       overlay.style.display = 'none';
+      messageBox.style.display = 'block';
+      playerInstruction.style.display = 'block';
       
       // Add title to indicate this is the playback tab
       document.title = "Play Video - SendVid Embed Test";
-    }
-    
-    // Prevent recursive behavior in playback tab
-    if (isPlaybackTab) {
-      videoFrame.addEventListener('click', function(e) {
-        // Allow normal interaction in playback tab
-        e.stopPropagation();
-      });
+      
+      // Auto-hide player instruction after 5 seconds
+      setTimeout(() => {
+        playerInstruction.style.opacity = '0';
+        setTimeout(() => {
+          playerInstruction.style.display = 'none';
+        }, 500);
+      }, 5000);
     }
   </script>
 </body>
