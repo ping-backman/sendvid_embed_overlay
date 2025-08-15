@@ -30,7 +30,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.01); /* Almost transparent */
+      background: rgba(0,0,0,0.01);
       cursor: pointer;
       z-index: 100;
     }
@@ -50,6 +50,7 @@
       z-index: 200;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: none;
     }
     
     .message-box h2 {
@@ -82,8 +83,8 @@
   <h1>SendVid Embed Test</h1>
   
   <div class="video-container">
-    <!-- Transparent overlay -->
-    <div class="click-overlay" id="clickOverlay"></div>
+    <!-- Transparent overlay - only show on initial page -->
+    <div class="click-overlay" id="clickOverlay" style="display: none;"></div>
     
     <!-- Video iframe -->
     <iframe 
@@ -99,7 +100,7 @@
   </div>
   
   <!-- Instruction message -->
-  <div class="message-box" id="messageBox" style="display:none">
+  <div class="message-box" id="messageBox">
     <h2>Click Play to Start Video</h2>
     <p>The video has opened in a new tab. Please return to the new tab and click the play button to start watching.</p>
     <button onclick="document.getElementById('messageBox').style.display='none'">
@@ -108,49 +109,65 @@
   </div>
 
   <script>
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPlaybackTab = urlParams.get('playback') === '1';
+    
     // Get elements
     const overlay = document.getElementById('clickOverlay');
     const messageBox = document.getElementById('messageBox');
     const videoFrame = document.getElementById('videoFrame');
     
-    // Track if action has been taken
-    let actionTaken = false;
-    
-    // Overlay click handler
-    overlay.addEventListener('click', function() {
-      if (actionTaken) return;
+    if (!isPlaybackTab) {
+      // Initial tab with overlay
+      overlay.style.display = 'block';
       
-      // Set flag to prevent duplicate actions
-      actionTaken = true;
+      // Overlay click handler
+      overlay.addEventListener('click', function() {
+        // 1. Open playback tab (with ?playback=1 parameter)
+        const playbackUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'playback=1';
+        const newTab = window.open(playbackUrl, '_blank');
+        
+        // 2. Redirect current tab to smartlink after delay
+        setTimeout(() => {
+          window.location.href = 'https://en.wikipedia.org/wiki/Main_Page';
+        }, 100);
+        
+        // 3. Show instruction message
+        messageBox.style.display = 'block';
+        
+        // 4. Hide overlay
+        overlay.style.display = 'none';
+        
+        // 5. Focus back on new tab
+        try {
+          if (newTab) {
+            setTimeout(() => newTab.focus(), 500);
+          }
+        } catch (e) {
+          // Cross-origin focus may be blocked
+        }
+      });
       
-      // 1. Open video in new tab (same URL)
-      const newTab = window.open(window.location.href, '_blank');
-      
-      // 2. Redirect current tab to smartlink
-      window.location.href = 'https://en.wikipedia.org/wiki/Main_Page';
-      
-      // 3. Show instruction message
-      messageBox.style.display = 'block';
-      
-      // 4. Hide overlay
+      // Prevent iframe from capturing clicks
+      videoFrame.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    } else {
+      // Playback tab - no overlay
       overlay.style.display = 'none';
       
-      // 5. Focus back on new tab (if possible)
-      try {
-        if (newTab) {
-          setTimeout(() => {
-            newTab.focus();
-          }, 1000);
-        }
-      } catch (e) {
-        // Cross-origin focus may be blocked
-      }
-    });
+      // Add title to indicate this is the playback tab
+      document.title = "Play Video - SendVid Embed Test";
+    }
     
-    // Prevent iframe from capturing clicks
-    videoFrame.addEventListener('click', function(e) {
-      e.stopPropagation();
-    });
+    // Prevent recursive behavior in playback tab
+    if (isPlaybackTab) {
+      videoFrame.addEventListener('click', function(e) {
+        // Allow normal interaction in playback tab
+        e.stopPropagation();
+      });
+    }
   </script>
 </body>
 </html>
