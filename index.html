@@ -1,149 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>SendVid Test Gallery</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SendVid Embed Test</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    h1 {
+      padding: 40px;
       text-align: center;
-      margin-bottom: 30px;
+      background: #f7f7f7;
       color: #333;
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-    }
-    .video-item {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .video-item:hover {
-      transform: translateY(-5px);
-    }
-    .video-thumb {
       position: relative;
-      padding-bottom: 56.25%;
-      background: #000;
     }
-    .play-btn {
+    h1 { color: #2c3e50; }
+    
+    .video-container {
+      margin: 30px auto;
+      max-width: 640px;
+      background: #000;
+      position: relative;
+      display: inline-block;
+    }
+    
+    /* Transparent overlay */
+    .click-overlay {
       position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.01); /* Almost transparent */
+      cursor: pointer;
+      z-index: 100;
+    }
+    
+    /* Message box */
+    .message-box {
+      position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      background: rgba(255, 0, 0, 0.7);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 25px;
+      border-radius: 10px;
+      max-width: 90%;
+      width: 400px;
+      z-index: 200;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .play-btn:after {
-      content: '';
-      display: inline-block;
-      width: 0;
-      height: 0;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      border-left: 12px solid white;
-      margin-left: 3px;
+    
+    .message-box h2 {
+      margin-bottom: 15px;
+      color: #ff6b6b;
     }
-    .video-info {
-      padding: 15px;
+    
+    .message-box p {
+      margin-bottom: 20px;
+      line-height: 1.5;
     }
-    .video-title {
-      font-weight: bold;
-      margin-bottom: 5px;
+    
+    .message-box button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
     }
-    .video-id {
-      color: #666;
-      font-size: 0.9em;
-      font-family: monospace;
+    
+    .message-box button:hover {
+      background: #45a049;
     }
   </style>
 </head>
 <body>
-  <h1>SendVid Embed Test Gallery</h1>
+  <h1>SendVid Embed Test</h1>
   
-  <div class="gallery">
-    <div class="video-item" onclick="openVideo('3al2km1n')">
-      <div class="video-thumb">
-        <div class="play-btn"></div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">Video #1</div>
-        <div class="video-id">3al2km1n</div>
-      </div>
-    </div>
+  <div class="video-container">
+    <!-- Transparent overlay -->
+    <div class="click-overlay" id="clickOverlay"></div>
     
-    <div class="video-item" onclick="openVideo('q51kmonl')">
-      <div class="video-thumb">
-        <div class="play-btn"></div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">Video #2</div>
-        <div class="video-id">q51kmonl</div>
-      </div>
-    </div>
-    
-    <div class="video-item" onclick="openVideo('10kj2ma4')">
-      <div class="video-thumb">
-        <div class="play-btn"></div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">Video #3</div>
-        <div class="video-id">10kj2ma4</div>
-      </div>
-    </div>
-    
-    <div class="video-item" onclick="openVideo('clciiads')">
-      <div class="video-thumb">
-        <div class="play-btn"></div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">Video #4</div>
-        <div class="video-id">clciiads</div>
-      </div>
-    </div>
-    
-    <div class="video-item" onclick="openVideo('ho0kk6e4')">
-      <div class="video-thumb">
-        <div class="play-btn"></div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">Video #5</div>
-        <div class="video-id">ho0kk6e4</div>
-      </div>
-    </div>
-    
-    <div class="video-item" onclick="openVideo('e4g0feet')">
-      <div class="video-thumb">
-        <div class="play-btn"></div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">Video #6</div>
-        <div class="video-id">e4g0feet</div>
-      </div>
-    </div>
+    <!-- Video iframe -->
+    <iframe 
+      width="640" 
+      height="360" 
+      id="videoFrame"
+      src="https://sendvid.com/embed/dai1ytu4" 
+      frameborder="0" 
+      allowfullscreen
+      sandbox="allow-scripts allow-same-origin" 
+      allow="autoplay; fullscreen">
+    </iframe>
+  </div>
+  
+  <!-- Instruction message -->
+  <div class="message-box" id="messageBox" style="display:none">
+    <h2>Click Play to Start Video</h2>
+    <p>The video has opened in a new tab. Please return to the new tab and click the play button to start watching.</p>
+    <button onclick="document.getElementById('messageBox').style.display='none'">
+      OK, I Understand
+    </button>
   </div>
 
   <script>
-    function openVideo(videoId) {
-      // Open video in new tab using the /v/ path
-      window.open(`/v/${videoId}`, '_blank');
-    }
+    // Get elements
+    const overlay = document.getElementById('clickOverlay');
+    const messageBox = document.getElementById('messageBox');
+    const videoFrame = document.getElementById('videoFrame');
+    
+    // Track if action has been taken
+    let actionTaken = false;
+    
+    // Overlay click handler
+    overlay.addEventListener('click', function() {
+      if (actionTaken) return;
+      
+      // Set flag to prevent duplicate actions
+      actionTaken = true;
+      
+      // 1. Open video in new tab (same URL)
+      const newTab = window.open(window.location.href, '_blank');
+      
+      // 2. Redirect current tab to smartlink
+      window.location.href = 'https://en.wikipedia.org/wiki/Main_Page';
+      
+      // 3. Show instruction message
+      messageBox.style.display = 'block';
+      
+      // 4. Hide overlay
+      overlay.style.display = 'none';
+      
+      // 5. Focus back on new tab (if possible)
+      try {
+        if (newTab) {
+          setTimeout(() => {
+            newTab.focus();
+          }, 1000);
+        }
+      } catch (e) {
+        // Cross-origin focus may be blocked
+      }
+    });
+    
+    // Prevent iframe from capturing clicks
+    videoFrame.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
   </script>
 </body>
 </html>
